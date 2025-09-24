@@ -1,0 +1,309 @@
+{
+  "info": {
+    "name": "Face Recognition API - Updated (employee_code)",
+    "description": "API collection for face recognition system using employee_code (varchar) instead of employee_id (integer)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        },
+        "description": "Kiểm tra trạng thái hoạt động của API"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Employee",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_code\": \"EMP003\",\n  \"full_name\": \"Lê Văn C\",\n  \"email\": \"levanc@company.com\",\n  \"department\": \"Finance\",\n  \"position\": \"Accountant\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/employees",
+          "host": ["{{base_url}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Tạo nhân viên mới với employee_code (varchar)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Employees",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/employees",
+          "host": ["{{base_url}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Lấy danh sách tất cả nhân viên"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Employee by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/employees/6",
+          "host": ["{{base_url}}"],
+          "path": ["api", "employees", "6"]
+        },
+        "description": "Lấy thông tin nhân viên theo ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Employee",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"Ngô Hồng Quân (Updated)\",\n  \"department\": \"IT\",\n  \"position\": \"Senior Developer\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/employees/6",
+          "host": ["{{base_url}}"],
+          "path": ["api", "employees", "6"]
+        },
+        "description": "Cập nhật thông tin nhân viên"
+      },
+      "response": []
+    },
+    {
+      "name": "Enroll Face (using employee_code)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "path/to/face_image.jpg",
+              "description": "Ảnh khuôn mặt để đăng ký"
+            },
+            {
+              "key": "employee_code",
+              "value": "QuanNH",
+              "type": "text",
+              "description": "Mã nhân viên (varchar)"
+            },
+            {
+              "key": "created_by",
+              "value": "admin",
+              "type": "text",
+              "description": "Người tạo"
+            },
+            {
+              "key": "source",
+              "value": "ENROLL",
+              "type": "text",
+              "description": "Nguồn đăng ký"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/face/enroll",
+          "host": ["{{base_url}}"],
+          "path": ["api", "face", "enroll"]
+        },
+        "description": "Đăng ký khuôn mặt mới sử dụng employee_code (varchar)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Face Embeddings",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/face/embeddings",
+          "host": ["{{base_url}}"],
+          "path": ["api", "face", "embeddings"]
+        },
+        "description": "Lấy danh sách tất cả face embeddings"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Face Embeddings by Employee Code",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/face/embeddings?employee_code=QuanNH",
+          "host": ["{{base_url}}"],
+          "path": ["api", "face", "embeddings"],
+          "query": [
+            {
+              "key": "employee_code",
+              "value": "QuanNH",
+              "description": "Mã nhân viên để lọc"
+            }
+          ]
+        },
+        "description": "Lấy face embeddings theo employee_code"
+      },
+      "response": []
+    },
+    {
+      "name": "Recognize Face",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "path/to/test_image.jpg",
+              "description": "Ảnh khuôn mặt để nhận diện"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{base_url}}/api/face/recognize",
+          "host": ["{{base_url}}"],
+          "path": ["api", "face", "recognize"]
+        },
+        "description": "Nhận diện khuôn mặt và trả về thông tin nhân viên"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Face Embedding (Soft Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/face/embeddings/1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Xóa mềm face embedding (đánh dấu là DELETED)"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Face Embedding (Hard Delete)",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hard_delete\": true\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/face/embeddings/1",
+          "host": ["{{base_url}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Xóa cứng face embedding (xóa hoàn toàn khỏi database)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Storage Stats",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/storage/stats",
+          "host": ["{{base_url}}"],
+          "path": ["api", "storage", "stats"]
+        },
+        "description": "Lấy thống kê lưu trữ MinIO"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Storage Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/storage/health",
+          "host": ["{{base_url}}"],
+          "path": ["api", "storage", "health"]
+        },
+        "description": "Kiểm tra trạng thái MinIO"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Employee Images",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/employees/QuanNH/images",
+          "host": ["{{base_url}}"],
+          "path": ["api", "employees", "QuanNH", "images"]
+        },
+        "description": "Lấy danh sách ảnh của nhân viên"
+      },
+      "response": []
+    },
+    {
+      "name": "Cleanup Old Images",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"days\": 30\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/storage/cleanup",
+          "host": ["{{base_url}}"],
+          "path": ["api", "storage", "cleanup"]
+        },
+        "description": "Dọn dẹp ảnh cũ hơn số ngày chỉ định"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:5555",
+      "description": "Base URL của API"
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+# Face Recognition API - cURL Commands for Postman
+# Base URL: http://localhost:5555
+
+# ===========================================
+# 1. HEALTH CHECK
+# ===========================================
+curl -X GET http://localhost:5555/health
+
+# ===========================================
+# 2. CREATE EMPLOYEE
+# ===========================================
+curl -X POST http://localhost:5555/api/employees \
+  -H "Content-Type: application/json" \
+  -d '{
+    "employee_code": "EMP001",
+    "full_name": "Nguyễn Văn A",
+    "email": "nguyenvana@company.com",
+    "department": "IT",
+    "position": "Developer"
+  }'
+
+# ===========================================
+# 3. GET ALL EMPLOYEES
+# ===========================================
+curl -X GET http://localhost:5555/api/employees
+
+# ===========================================
+# 4. FACE ENROLLMENT
+# ===========================================
+curl -X POST http://localhost:5555/api/face/enroll \
+  -F "image=@/path/to/face_image.jpg" \
+  -F "employee_id=1" \
+  -F "created_by=admin" \
+  -F "source=ENROLL"
+
+# ===========================================
+# 5. FACE RECOGNITION
+# ===========================================
+curl -X POST http://localhost:5555/api/face/recognize \
+  -F "image=@/path/to/test_image.jpg"
+
+# ===========================================
+# 6. GET FACE EMBEDDINGS
+# ===========================================
+curl -X GET http://localhost:5555/api/face/embeddings
+
+# Get embeddings for specific employee
+curl -X GET "http://localhost:5555/api/face/embeddings?employee_id=1"
+
+# ===========================================
+# 7. GET SPECIFIC FACE EMBEDDING
+# ===========================================
+curl -X GET http://localhost:5555/api/face/embeddings/1
+
+# ===========================================
+# 8. UPDATE FACE EMBEDDING
+# ===========================================
+curl -X PUT http://localhost:5555/api/face/embeddings/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "quality_score": 0.95,
+    "liveness_score": 0.8,
+    "status": "ACTIVE",
+    "created_by": "admin"
+  }'
+
+# ===========================================
+# 9. DELETE FACE EMBEDDING (SOFT DELETE)
+# ===========================================
+curl -X DELETE http://localhost:5555/api/face/embeddings/1 \
+  -H "Content-Type: application/json" \
+  -d '{"hard_delete": false}'
+
+# ===========================================
+# 10. STORAGE HEALTH CHECK
+# ===========================================
+curl -X GET http://localhost:5555/api/storage/health
+
+# ===========================================
+# 11. STORAGE STATISTICS
+# ===========================================
+curl -X GET http://localhost:5555/api/storage/stats
+
+# ===========================================
+# 12. GET EMPLOYEE IMAGES
+# ===========================================
+curl -X GET http://localhost:5555/api/employees/1/images
+
+# ===========================================
+# 13. CLEANUP OLD IMAGES
+# ===========================================
+curl -X POST http://localhost:5555/api/storage/cleanup \
+  -H "Content-Type: application/json" \
+  -d '{"days": 30}'
+
+# ===========================================
+# POSTMAN COLLECTION JSON
+# ===========================================
+# Copy the JSON below and import into Postman
+
+{
+  "info": {
+    "name": "Face Recognition API",
+    "description": "API for face recognition and employee management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5555"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Create Employee",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_code\": \"EMP001\",\n  \"full_name\": \"Nguyễn Văn A\",\n  \"email\": \"nguyenvana@company.com\",\n  \"department\": \"IT\",\n  \"position\": \"Developer\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        }
+      }
+    },
+    {
+      "name": "Get Employees",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        }
+      }
+    },
+    {
+      "name": "Face Recognition",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/your/image.jpg"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/recognize",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "recognize"]
+        }
+      }
+    },
+    {
+      "name": "Face Enrollment",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": "/path/to/your/face.jpg"
+            },
+            {
+              "key": "employee_id",
+              "value": "1",
+              "type": "text"
+            },
+            {
+              "key": "created_by",
+              "value": "admin",
+              "type": "text"
+            },
+            {
+              "key": "source",
+              "value": "ENROLL",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/enroll",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "enroll"]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,295 @@
+{
+  "info": {
+    "name": "Face Recognition API",
+    "description": "Complete API collection for Face Recognition Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5555",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Check if the API service is running"
+      },
+      "response": []
+    },
+    {
+      "name": "Create Employee",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_code\": \"EMP001\",\n  \"full_name\": \"Nguyễn Văn A\",\n  \"email\": \"nguyenvana@company.com\",\n  \"department\": \"IT\",\n  \"position\": \"Developer\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Create a new employee"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Employees",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Get list of all employees"
+      },
+      "response": []
+    },
+    {
+      "name": "Face Recognition",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": [],
+              "description": "Upload image file containing a face to recognize"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/recognize",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "recognize"]
+        },
+        "description": "Recognize a face and return employee information"
+      },
+      "response": []
+    },
+    {
+      "name": "Face Enrollment",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": [],
+              "description": "Upload face image for enrollment"
+            },
+            {
+              "key": "employee_id",
+              "value": "1",
+              "type": "text",
+              "description": "ID of the employee"
+            },
+            {
+              "key": "created_by",
+              "value": "admin",
+              "type": "text",
+              "description": "User who created this enrollment"
+            },
+            {
+              "key": "source",
+              "value": "ENROLL",
+              "type": "text",
+              "description": "Source of enrollment (ENROLL/VERIFY/IMPORT)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/enroll",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "enroll"]
+        },
+        "description": "Enroll a face for an employee"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Face Embeddings",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings"]
+        },
+        "description": "Get all face embeddings"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Face Embeddings by Employee",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings?employee_id=1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings"],
+          "query": [
+            {
+              "key": "employee_id",
+              "value": "1"
+            }
+          ]
+        },
+        "description": "Get face embeddings for specific employee"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Specific Face Embedding",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Get specific face embedding by ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Update Face Embedding",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quality_score\": 0.95,\n  \"liveness_score\": 0.8,\n  \"status\": \"ACTIVE\",\n  \"created_by\": \"admin\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Update face embedding information"
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Face Embedding",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hard_delete\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Delete face embedding (soft delete by default)"
+      },
+      "response": []
+    },
+    {
+      "name": "Storage Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/storage/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "storage", "health"]
+        },
+        "description": "Check MinIO storage health"
+      },
+      "response": []
+    },
+    {
+      "name": "Storage Statistics",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/storage/stats",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "storage", "stats"]
+        },
+        "description": "Get storage statistics"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Employee Images",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/1/images",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees", "1", "images"]
+        },
+        "description": "Get all images for an employee"
+      },
+      "response": []
+    },
+    {
+      "name": "Cleanup Old Images",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"days\": 30\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/storage/cleanup",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "storage", "cleanup"]
+        },
+        "description": "Clean up images older than specified days"
+      },
+      "response": []
+    }
+  ]
+}

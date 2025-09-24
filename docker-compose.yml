@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # Face Recognition Application
+  face-recognition-app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: face_attendance_app
+    environment:
+      # Database Configuration (kết nối với PostgreSQL có sẵn)
+      DATABASE_URL: postgresql://postgres:postgres@160.191.245.38:5433/face_attendance
+      
+      # Flask Configuration
+      FLASK_ENV: development
+      FLASK_DEBUG: "True"
+      SECRET_KEY: face-recognition-secret-key-docker-2024
+      
+      # MinIO Configuration (kết nối với MinIO có sẵn)
+      MINIO_ENDPOINT: 160.191.245.38:9000
+      MINIO_ACCESS_KEY: admin
+      MINIO_SECRET_KEY: Ngoquan@2003
+      MINIO_BUCKET_NAME: face-check
+      MINIO_SECURE: "False"
+      
+      # App Configuration
+      HOST: 0.0.0.0
+      PORT: 5555
+      FACE_RECOGNITION_TOLERANCE: 0.6
+      STORE_ORIGINAL_IMAGES: "True"
+      AUTO_INIT_DB: "True"
+      
+      # Logging
+      LOG_LEVEL: INFO
+      
+      # Performance
+      DB_POOL_MAX_CONN: 10
+      
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5555/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Kết nối trực tiếp với external services qua IP 

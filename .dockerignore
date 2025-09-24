@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Environment files
+.env*
+config.env.example
+
+# Logs
+*.log
+logs/
+
+# Test files
+test_images/
+test_*.py
+
+# Documentation
+*.md
+LICENSE
+
+# Uploads (will be mounted as volume)
+uploads/
+
+# Database files
+*.db
+*.sqlite3
+
+# Node modules (if any)
+node_modules/
+
+# Temporary files
+*.tmp
+*.temp 

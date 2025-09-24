@@ -1,0 +1,295 @@
+{
+  "info": {
+    "name": "Face Recognition API - Tiếng Việt",
+    "description": "Bộ API đầy đủ cho hệ thống nhận diện khuôn mặt và chấm công nhân viên",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5555",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Kiểm tra sức khỏe hệ thống",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        },
+        "description": "Kiểm tra xem API service có đang chạy không"
+      },
+      "response": []
+    },
+    {
+      "name": "Tạo nhân viên mới",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"employee_code\": \"EMP001\",\n  \"full_name\": \"Nguyễn Văn A\",\n  \"email\": \"nguyenvana@company.com\",\n  \"department\": \"IT\",\n  \"position\": \"Developer\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Tạo thông tin nhân viên mới trong hệ thống"
+      },
+      "response": []
+    },
+    {
+      "name": "Lấy danh sách nhân viên",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees"]
+        },
+        "description": "Lấy danh sách tất cả nhân viên trong hệ thống"
+      },
+      "response": []
+    },
+    {
+      "name": "Nhận diện khuôn mặt",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": [],
+              "description": "Upload ảnh chứa khuôn mặt cần nhận diện"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/recognize",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "recognize"]
+        },
+        "description": "Nhận diện khuôn mặt và trả về thông tin nhân viên tương ứng"
+      },
+      "response": []
+    },
+    {
+      "name": "Đăng ký mẫu khuôn mặt",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "image",
+              "type": "file",
+              "src": [],
+              "description": "Upload ảnh khuôn mặt để đăng ký"
+            },
+            {
+              "key": "employee_id",
+              "value": "1",
+              "type": "text",
+              "description": "ID của nhân viên"
+            },
+            {
+              "key": "created_by",
+              "value": "admin",
+              "type": "text",
+              "description": "Người tạo mẫu khuôn mặt này"
+            },
+            {
+              "key": "source",
+              "value": "ENROLL",
+              "type": "text",
+              "description": "Nguồn đăng ký (ENROLL/VERIFY/IMPORT)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/enroll",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "enroll"]
+        },
+        "description": "Đăng ký mẫu khuôn mặt cho nhân viên"
+      },
+      "response": []
+    },
+    {
+      "name": "Lấy danh sách mẫu khuôn mặt",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings"]
+        },
+        "description": "Lấy danh sách tất cả mẫu khuôn mặt đã đăng ký"
+      },
+      "response": []
+    },
+    {
+      "name": "Lấy mẫu khuôn mặt theo nhân viên",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings?employee_id=1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings"],
+          "query": [
+            {
+              "key": "employee_id",
+              "value": "1"
+            }
+          ]
+        },
+        "description": "Lấy mẫu khuôn mặt của nhân viên cụ thể"
+      },
+      "response": []
+    },
+    {
+      "name": "Lấy thông tin mẫu khuôn mặt",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Lấy thông tin chi tiết của mẫu khuôn mặt theo ID"
+      },
+      "response": []
+    },
+    {
+      "name": "Cập nhật mẫu khuôn mặt",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quality_score\": 0.95,\n  \"liveness_score\": 0.8,\n  \"status\": \"ACTIVE\",\n  \"created_by\": \"admin\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Cập nhật thông tin mẫu khuôn mặt (chất lượng, trạng thái, v.v.)"
+      },
+      "response": []
+    },
+    {
+      "name": "Xóa mẫu khuôn mặt",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"hard_delete\": false\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/face/embeddings/1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "face", "embeddings", "1"]
+        },
+        "description": "Xóa mẫu khuôn mặt (mặc định là soft delete)"
+      },
+      "response": []
+    },
+    {
+      "name": "Kiểm tra sức khỏe lưu trữ",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/storage/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "storage", "health"]
+        },
+        "description": "Kiểm tra tình trạng hoạt động của MinIO storage"
+      },
+      "response": []
+    },
+    {
+      "name": "Thống kê lưu trữ",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/storage/stats",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "storage", "stats"]
+        },
+        "description": "Lấy thống kê về dung lượng và số lượng ảnh đã lưu trữ"
+      },
+      "response": []
+    },
+    {
+      "name": "Lấy ảnh của nhân viên",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/employees/1/images",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "employees", "1", "images"]
+        },
+        "description": "Lấy danh sách tất cả ảnh khuôn mặt của một nhân viên"
+      },
+      "response": []
+    },
+    {
+      "name": "Dọn dẹp ảnh cũ",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"days\": 30\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/storage/cleanup",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "storage", "cleanup"]
+        },
+        "description": "Xóa các ảnh cũ hơn số ngày được chỉ định"
+      },
+      "response": []
+    }
+  ]
+}
