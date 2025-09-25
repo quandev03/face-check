@@ -3,9 +3,9 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies with specific versions
 RUN apt-get update && apt-get install -y \
-    cmake \
+    cmake=3.25.1-* \
     build-essential \
     libopenblas-dev \
     liblapack-dev \
@@ -20,15 +20,18 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip and install wheel
 RUN pip install --upgrade pip wheel
 
-# Install dlib first with pre-built wheel if available, fallback to source
-RUN pip install --no-cache-dir dlib==19.24.2 || \
-    (echo "Pre-built wheel not available, building from source..." && \
-     pip install --no-cache-dir dlib==19.24.2)
+# Set CMake policy to handle version compatibility
+ENV CMAKE_POLICY_VERSION_MINIMUM=3.5
+
+# Install dlib with specific build flags for ARM64
+RUN pip install --no-cache-dir --no-binary=dlib dlib==19.24.2 \
+    --config-settings="--global-option=build_ext" \
+    --config-settings="--global-option=-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies (excluding face-recognition first)
+# Install other Python dependencies
 RUN pip install --no-cache-dir \
     Flask==2.3.3 \
     flask-cors==4.0.0 \
