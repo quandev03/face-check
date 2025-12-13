@@ -1,0 +1,17 @@
+# GUI Application Dependencies
+
+# GUI Framework
+customtkinter==5.2.1
+
+# Computer Vision
+opencv-python==4.8.1.78
+mediapipe==0.10.8  # Requires Python 3.8-3.11
+Pillow>=10.0.0
+numpy>=1.24.0
+
+# API Communication
+requests>=2.31.0
+
+# Utilities
+python-dotenv>=1.0.0
+

@@ -46,7 +46,8 @@ class FaceService:
                 logger.info(f"Resized image from {width}x{height} to {new_width}x{new_height}")
             
             # Find face locations with different models for better accuracy
-            face_locations = face_recognition.face_locations(image_rgb, model='hog')
+            face_locations = face_recpython app.py
+ognition.face_locations(image_rgb, model='hog')
             
             if not face_locations:
                 # Try with CNN model if HOG fails
@@ -205,7 +206,7 @@ class FaceService:
             }
     
 
-    def recognize_face(self, image_data: bytes) -> Dict[str, Any]:
+    def recognize_face(self, image_data: bytes, device_code: Optional[str] = None) -> Dict[str, Any]:
         """
         Recognize face with improved accuracy using multiple templates
         """
@@ -304,6 +305,29 @@ class FaceService:
                 if quality_score > 0.7:
                     confidence = min(1.0, confidence * 1.1)
                 
+                # Log attendance on successful recognition
+                try:
+                    bbox_array = [bbox['top'], bbox['right'], bbox['bottom'], bbox['left']] if bbox else None
+                    insert_log = """
+                        INSERT INTO attendance_logs (
+                            employee_code, recognized_at, device_code, confidence, distance, quality_score, bbox, image_url, source
+                        ) VALUES (%s, now(), %s, %s, %s, %s, %s, %s, %s)
+                        RETURNING id
+                    """
+                    # Try to include image_url if available from MinIO recent upload (not available here); keep NULL
+                    _log = db_manager.execute_one(insert_log, (
+                        best_match['employee_id'],
+                        device_code,
+                        float(round(confidence, 3)),
+                        float(round(best_distance, 4)),
+                        float(round(quality_score, 3)),
+                        bbox_array,
+                        None,
+                        'RECOGNIZE'
+                    ))
+                except Exception as e:
+                    logger.warning(f"Failed to write attendance log: {e}")
+
                 return {
                     'success': True,
                     'employee_id': best_match['employee_id'],  # This is now employee_code

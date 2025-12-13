@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+  face_attendance_postgres:
+    image: pgvector/pgvector:pg13
+    container_name: face_attendance_postgres
+    environment:
+      - POSTGRES_DB=face_attendance
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: Ngoquan@2003
+    command: server /data --console-address ':9001'
+    volumes:
+      - ./minio_data:/data

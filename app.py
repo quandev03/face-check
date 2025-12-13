@@ -8,7 +8,7 @@ import traceback
 
 from config import Config
 from database import init_database, db_manager
-from face_service import face_service
+from face_service_mediapipe import face_service
 from minio_service import minio_service
 from schemas import (
     FaceEnrollRequestSchema,
@@ -116,6 +116,54 @@ def enroll_face():
         if len(image_data) == 0:
             return handle_error('Empty image file')
         
+        # Create or update employee if employee info is provided
+        employee_code = validated_data['employee_code']
+        if any(validated_data.get(field) for field in ['full_name', 'email', 'department', 'position']):
+            try:
+                # Check if employee exists
+                check_query = "SELECT id FROM employees WHERE employee_code = %s"
+                existing = db_manager.execute_one(check_query, (employee_code,))
+                
+                if existing:
+                    # Update existing employee
+                    update_query = """
+                        UPDATE employees 
+                        SET full_name = COALESCE(%s, full_name),
+                            email = COALESCE(%s, email),
+                            department = COALESCE(%s, department),
+                            position = COALESCE(%s, position),
+                            updated_at = now()
+                        WHERE employee_code = %s
+                    """
+                    db_manager.execute_query(update_query, (
+                        validated_data.get('full_name'),
+                        validated_data.get('email'),
+                        validated_data.get('department'),
+                        validated_data.get('position'),
+                        employee_code
+                    ))
+                    logger.info(f"Updated employee: {employee_code}")
+                else:
+                    # Create new employee (full_name is required for new employees)
+                    if not validated_data.get('full_name'):
+                        return handle_error('full_name is required when creating a new employee')
+                    
+                    insert_query = """
+                        INSERT INTO employees (employee_code, full_name, email, department, position)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """
+                    db_manager.execute_query(insert_query, (
+                        employee_code,
+                        validated_data['full_name'],
+                        validated_data.get('email'),
+                        validated_data.get('department'),
+                        validated_data.get('position')
+                    ))
+                    logger.info(f"Created new employee: {employee_code}")
+            except Exception as e:
+                logger.warning(f"Failed to create/update employee: {str(e)}")
+                # Continue with face enrollment even if employee creation fails
+        
         # Save face embedding
         result = face_service.save_face_embedding(
             employee_code=validated_data['employee_code'],
@@ -163,14 +211,45 @@ def recognize_face():
         if not allowed_file(file.filename):
             return handle_error('Invalid file type. Allowed: png, jpg, jpeg, gif, bmp')
         
+        # Optional device_code (from form or header)
+        device_code = request.form.get('device_code') or request.headers.get('X-Device-Code')
+
         # Read image data
         image_data = file.read()
         if len(image_data) == 0:
             return handle_error('Empty image file')
         
-        # Recognize face
-        result = face_service.recognize_face(image_data)
-        
+        # Recognize face (and log attendance on success)
+        result = face_service.recognize_face(image_data, device_code=device_code)
+
+        # Nếu nhận diện thành công -> gọi API check-in chấm công timesheet bên ngoài
+        if result.get("success") and result.get("employee_code"):
+            import os
+            import requests
+            CHECKIN_URL = os.environ.get("CHECKIN_URL", "http://localhost:8080/api/user-timesheet/check-in")
+            CHECKIN_CLIENT_ID = os.environ.get("CHECKIN_CLIENT_ID", "<CLIENT_ID_HERE>")
+            CHECKIN_API_KEY = os.environ.get("CHECKIN_API_KEY", "<API_KEY_HERE>")
+            CHECKIN_TOKEN = os.environ.get("CHECKIN_TOKEN", "<YOUR_BEARER_TOKEN>")
+            username = result["employee_code"]
+
+            headers = {
+                "x-client-id": CHECKIN_CLIENT_ID,
+                "x-api-key": CHECKIN_API_KEY,
+                "Authorization": f"Bearer {CHECKIN_TOKEN}",
+                "Content-Type": "application/json"
+            }
+            payload = {"username": username}
+            try:
+                resp = requests.post(CHECKIN_URL, headers=headers, json=payload, timeout=7)
+                if resp.status_code == 200:
+                    result["checkin"] = True
+                else:
+                    result["checkin"] = False
+                    result["checkin_error"] = resp.text
+            except Exception as ex:
+                result["checkin"] = False
+                result["checkin_error"] = str(ex)
+
         # Return result using schema
         return jsonify(recognition_response_schema.dump(result))
         
@@ -198,6 +277,60 @@ def get_face_embeddings():
     except Exception as e:
         logger.error(f"Error in get_face_embeddings: {str(e)}")
         return handle_error('Failed to get face embeddings', 500)
+
+
+@app.route('/api/attendance/logs', methods=['GET'])
+def list_attendance_logs():
+    """
+    API lấy lịch sử chấm công
+    Query params: employee_code, device_code, date_from, date_to, limit (default 100)
+    """
+    try:
+        employee_code = request.args.get('employee_code')
+        device_code = request.args.get('device_code')
+        date_from = request.args.get('date_from')  # ISO date/time
+        date_to = request.args.get('date_to')
+        limit = int(request.args.get('limit', 100))
+
+        where_clauses = []
+        params = []
+
+        if employee_code:
+            where_clauses.append("employee_code = %s")
+            params.append(employee_code)
+        if device_code:
+            where_clauses.append("device_code = %s")
+            params.append(device_code)
+        if date_from:
+            where_clauses.append("recognized_at >= %s")
+            params.append(date_from)
+        if date_to:
+            where_clauses.append("recognized_at <= %s")
+            params.append(date_to)
+
+        where_sql = ("WHERE " + " AND ".join(where_clauses)) if where_clauses else ""
+
+        query = f"""
+            SELECT al.id, al.employee_code, e.full_name, al.recognized_at, al.device_code,
+                   al.confidence, al.distance, al.quality_score
+            FROM attendance_logs al
+            LEFT JOIN employees e ON e.employee_code = al.employee_code
+            {where_sql}
+            ORDER BY al.recognized_at DESC
+            LIMIT %s
+        """
+        params.append(limit)
+
+        rows = db_manager.execute_query(query, tuple(params), fetch=True)
+
+        return jsonify({
+            'success': True,
+            'data': [dict(r) for r in rows],
+            'count': len(rows)
+        })
+    except Exception as e:
+        logger.error(f"Error in list_attendance_logs: {str(e)}")
+        return handle_error('Failed to get attendance logs', 500)
 
 @app.route('/api/face/embeddings/<int:face_id>', methods=['GET'])
 def get_face_embedding(face_id):

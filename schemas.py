@@ -35,6 +35,11 @@ class FaceEnrollRequestSchema(Schema):
     employee_code = fields.String(required=True, validate=validate.Length(min=1, max=50))
     created_by = fields.String(allow_none=True, validate=validate.Length(max=64))
     source = fields.String(missing='ENROLL', validate=validate.OneOf(['ENROLL', 'VERIFY', 'IMPORT']))
+    # Optional employee info fields (for creating/updating employee if not exists)
+    full_name = fields.String(allow_none=True, validate=validate.Length(max=255))
+    email = fields.Email(allow_none=True)
+    department = fields.String(allow_none=True, validate=validate.Length(max=100))
+    position = fields.String(allow_none=True, validate=validate.Length(max=100))
 
 class FaceUpdateRequestSchema(Schema):
     quality_score = fields.Float(allow_none=True, validate=validate.Range(min=0, max=1))

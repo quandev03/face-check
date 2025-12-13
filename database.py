@@ -135,6 +135,24 @@ def init_database():
         "CREATE INDEX IF NOT EXISTS idx_face_embeddings_status ON face_embeddings(status);",
         "CREATE INDEX IF NOT EXISTS idx_face_embeddings_sha256 ON face_embeddings(sha256);",
         "CREATE INDEX IF NOT EXISTS idx_employees_code ON employees(employee_code);",
+        
+        # Attendance logs table to record recognition events (check-in/out history)
+        """
+        CREATE TABLE IF NOT EXISTS attendance_logs (
+            id BIGSERIAL PRIMARY KEY,
+            employee_code VARCHAR(50) NOT NULL REFERENCES employees(employee_code) ON DELETE CASCADE,
+            recognized_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+            device_code VARCHAR(64),
+            confidence REAL,
+            distance REAL,
+            quality_score REAL,
+            bbox INT4[4],
+            image_url TEXT,
+            source VARCHAR(32) DEFAULT 'RECOGNIZE' NOT NULL
+        );
+        """,
+        "CREATE INDEX IF NOT EXISTS idx_att_logs_emp_time ON attendance_logs(employee_code, recognized_at);",
+        "CREATE INDEX IF NOT EXISTS idx_att_logs_device_time ON attendance_logs(device_code, recognized_at);",
     ]
     
     try:
