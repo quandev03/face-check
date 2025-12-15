@@ -10,13 +10,13 @@ from typing import Optional
 from PIL import Image, ImageTk
 import os
 import requests
+from tkinter import messagebox
 
 
 from gui_app.screens.base_screen import BaseScreen
 from gui_app.camera_service import CameraService
 from gui_app.api_client import APIClient
 from gui_app.utils.image_utils import cv2_to_pil, image_to_bytes
-
 # Import gui_app.config - PyInstaller will bundle it correctly
 try:
     from gui_app.config import AppConfig
@@ -126,13 +126,14 @@ class EnrollScreen(BaseScreen):
         
         # Employee Code
         ctk.CTkLabel(form_frame, text="Mã Nhân Viên *:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        self.employee_code_entry = ctk.CTkEntry(form_frame, width=300)
-        self.employee_code_entry.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        self.employee_code_entry = ctk.CTkEntry(form_frame, width=220)
+        self.employee_code_entry.grid(row=0, column=1, padx=(10,0), pady=10, sticky="ew")
+        self.check_info_btn = ctk.CTkButton(form_frame, text="Kiểm tra thông tin", width=80, command=self._check_employee_info)
+        self.check_info_btn.grid(row=0, column=2, padx=(6,10), pady=10, sticky="ew")
         
         # Full Name
         ctk.CTkLabel(form_frame, text="Họ và Tên *:").grid(row=1, column=0, padx=10, pady=10, sticky="w")
         self.full_name_entry = ctk.CTkEntry(form_frame, width=300)
-        self.full_name_entry.grid(row=1, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
         self.full_name_entry.configure(state="disabled")
         self.full_name_entry.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
         
@@ -164,9 +165,6 @@ class EnrollScreen(BaseScreen):
         self.captured_preview_label.grid(row=2, column=0, padx=20, pady=10)
 
 
-        self.employee_code_entry = ctk.CTkEntry(right_frame, placeholder_text="Nhập mã nhân viên")
-        self.check_info_btn = ctk.CTkButton(right_frame, text="Kiểm tra thông tin", command=self._check_employee_info)
-        self.check_info_btn.grid(row=5, column=0, padx=20, pady=10)
         # Submit button
         self.submit_btn = ctk.CTkButton(
             right_frame,
@@ -318,7 +316,7 @@ class EnrollScreen(BaseScreen):
             self.status_label.configure(text="Vui lòng nhập mã nhân viên để kiểm tra!", text_color="red")
             return
         try:
-            url = f"http://{domain}/api/v1/employee/get-detail-face-check?q={code}"
+            url = f"https://api-ns.quannh.click/api/v1/employee/get-detail-face-check?q={code}"
             resp = requests.get(url, timeout=7)
             if resp.status_code == 200:
                 result = resp.json()
@@ -495,3 +493,5 @@ class EnrollScreen(BaseScreen):
         """Cleanup resources"""
         self._stop_camera()
 
+    def message(self, code):
+        CtkMessageMox
