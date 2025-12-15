@@ -10,7 +10,7 @@ class Config:
     FLASK_DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() in ['true', '1', 'yes']
     
     # Database Configuration
-    DATABASE_URL = os.environ.get('DATABASE_URL') or 'postgresql://postgres:postgres@localhost:5432/face_attendance'
+    DATABASE_URL = os.environ.get('DATABASE_URL') or 'postgresql://postgres:postgres@160.191.245.38:5433/face_attendance'
     
     # File Upload Configuration
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or 'uploads'

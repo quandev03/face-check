@@ -42,7 +42,7 @@ class AppConfig:
     """Application configuration"""
     
     # API Configuration
-    API_BASE_URL = os.environ.get('API_BASE_URL', 'http://localhost:5555')
+    API_BASE_URL = os.environ.get('API_BASE_URL', 'https://ns-face-api.quannh.click')
     API_TIMEOUT = int(os.environ.get('API_TIMEOUT', 30))
     
     # Camera Configuration

@@ -95,7 +95,7 @@ class APIClient:
         """
         # Prepare form data
         files = {
-            'image': ('face.jpg', image_data, 'image/jpeg')
+            'image': ('face.jpg', image_data, 'image/jpegx')
         }
         
         data = {

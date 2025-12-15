@@ -37,7 +37,7 @@ Tạo file `.env` trong thư mục gốc (hoặc sử dụng `config.env.example
 
 ```bash
 # API Configuration
-API_BASE_URL=http://localhost:5555
+API_BASE_URL=https://ns-face-api.quannh.click
 
 # Camera Configuration
 CAMERA_INDEX=0

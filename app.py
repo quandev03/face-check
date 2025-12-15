@@ -116,54 +116,6 @@ def enroll_face():
         if len(image_data) == 0:
             return handle_error('Empty image file')
         
-        # Create or update employee if employee info is provided
-        employee_code = validated_data['employee_code']
-        if any(validated_data.get(field) for field in ['full_name', 'email', 'department', 'position']):
-            try:
-                # Check if employee exists
-                check_query = "SELECT id FROM employees WHERE employee_code = %s"
-                existing = db_manager.execute_one(check_query, (employee_code,))
-                
-                if existing:
-                    # Update existing employee
-                    update_query = """
-                        UPDATE employees 
-                        SET full_name = COALESCE(%s, full_name),
-                            email = COALESCE(%s, email),
-                            department = COALESCE(%s, department),
-                            position = COALESCE(%s, position),
-                            updated_at = now()
-                        WHERE employee_code = %s
-                    """
-                    db_manager.execute_query(update_query, (
-                        validated_data.get('full_name'),
-                        validated_data.get('email'),
-                        validated_data.get('department'),
-                        validated_data.get('position'),
-                        employee_code
-                    ))
-                    logger.info(f"Updated employee: {employee_code}")
-                else:
-                    # Create new employee (full_name is required for new employees)
-                    if not validated_data.get('full_name'):
-                        return handle_error('full_name is required when creating a new employee')
-                    
-                    insert_query = """
-                        INSERT INTO employees (employee_code, full_name, email, department, position)
-                        VALUES (%s, %s, %s, %s, %s)
-                    """
-                    db_manager.execute_query(insert_query, (
-                        employee_code,
-                        validated_data['full_name'],
-                        validated_data.get('email'),
-                        validated_data.get('department'),
-                        validated_data.get('position')
-                    ))
-                    logger.info(f"Created new employee: {employee_code}")
-            except Exception as e:
-                logger.warning(f"Failed to create/update employee: {str(e)}")
-                # Continue with face enrollment even if employee creation fails
-        
         # Save face embedding
         result = face_service.save_face_embedding(
             employee_code=validated_data['employee_code'],
@@ -221,35 +173,7 @@ def recognize_face():
         
         # Recognize face (and log attendance on success)
         result = face_service.recognize_face(image_data, device_code=device_code)
-
-        # Nếu nhận diện thành công -> gọi API check-in chấm công timesheet bên ngoài
-        if result.get("success") and result.get("employee_code"):
-            import os
-            import requests
-            CHECKIN_URL = os.environ.get("CHECKIN_URL", "http://localhost:8080/api/user-timesheet/check-in")
-            CHECKIN_CLIENT_ID = os.environ.get("CHECKIN_CLIENT_ID", "<CLIENT_ID_HERE>")
-            CHECKIN_API_KEY = os.environ.get("CHECKIN_API_KEY", "<API_KEY_HERE>")
-            CHECKIN_TOKEN = os.environ.get("CHECKIN_TOKEN", "<YOUR_BEARER_TOKEN>")
-            username = result["employee_code"]
-
-            headers = {
-                "x-client-id": CHECKIN_CLIENT_ID,
-                "x-api-key": CHECKIN_API_KEY,
-                "Authorization": f"Bearer {CHECKIN_TOKEN}",
-                "Content-Type": "application/json"
-            }
-            payload = {"username": username}
-            try:
-                resp = requests.post(CHECKIN_URL, headers=headers, json=payload, timeout=7)
-                if resp.status_code == 200:
-                    result["checkin"] = True
-                else:
-                    result["checkin"] = False
-                    result["checkin_error"] = resp.text
-            except Exception as ex:
-                result["checkin"] = False
-                result["checkin_error"] = str(ex)
-
+        
         # Return result using schema
         return jsonify(recognition_response_schema.dump(result))
         

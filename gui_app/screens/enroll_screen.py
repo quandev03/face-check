@@ -126,34 +126,33 @@ class EnrollScreen(BaseScreen):
         
         # Employee Code
         ctk.CTkLabel(form_frame, text="Mã Nhân Viên *:").grid(row=0, column=0, padx=10, pady=10, sticky="w")
-        self.employee_code_entry = ctk.CTkEntry(form_frame, width=220)
-        self.employee_code_entry.grid(row=0, column=1, padx=(10,0), pady=10, sticky="ew")
-        self.check_info_btn = ctk.CTkButton(form_frame, text="Kiểm tra thông tin", width=80, command=self._check_employee_info)
-        self.check_info_btn.grid(row=0, column=2, padx=(6,10), pady=10, sticky="ew")
-
+        self.employee_code_entry = ctk.CTkEntry(form_frame, width=300)
+        self.employee_code_entry.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        
         # Full Name
         ctk.CTkLabel(form_frame, text="Họ và Tên *:").grid(row=1, column=0, padx=10, pady=10, sticky="w")
         self.full_name_entry = ctk.CTkEntry(form_frame, width=300)
         self.full_name_entry.grid(row=1, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
         self.full_name_entry.configure(state="disabled")
-
+        self.full_name_entry.grid(row=1, column=1, padx=10, pady=10, sticky="ew")
+        
         # Email
         ctk.CTkLabel(form_frame, text="Email:").grid(row=2, column=0, padx=10, pady=10, sticky="w")
         self.email_entry = ctk.CTkEntry(form_frame, width=300)
-        self.email_entry.grid(row=2, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
         self.email_entry.configure(state="disabled")
-
+        self.email_entry.grid(row=2, column=1, padx=10, pady=10, sticky="ew")
+        
         # Department
         ctk.CTkLabel(form_frame, text="Phòng Ban:").grid(row=3, column=0, padx=10, pady=10, sticky="w")
         self.department_entry = ctk.CTkEntry(form_frame, width=300)
-        self.department_entry.grid(row=3, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
         self.department_entry.configure(state="disabled")
-
+        self.department_entry.grid(row=3, column=1, padx=10, pady=10, sticky="ew")
+        
         # Position
         ctk.CTkLabel(form_frame, text="Chức Vụ:").grid(row=4, column=0, padx=10, pady=10, sticky="w")
         self.position_entry = ctk.CTkEntry(form_frame, width=300)
-        self.position_entry.grid(row=4, column=1, columnspan=2, padx=10, pady=10, sticky="ew")
         self.position_entry.configure(state="disabled")
+        self.position_entry.grid(row=4, column=1, padx=10, pady=10, sticky="ew")
         
         # Captured image preview
         self.captured_preview_label = ctk.CTkLabel(
@@ -165,6 +164,9 @@ class EnrollScreen(BaseScreen):
         self.captured_preview_label.grid(row=2, column=0, padx=20, pady=10)
 
 
+        self.employee_code_entry = ctk.CTkEntry(right_frame, placeholder_text="Nhập mã nhân viên")
+        self.check_info_btn = ctk.CTkButton(right_frame, text="Kiểm tra thông tin", command=self._check_employee_info)
+        self.check_info_btn.grid(row=5, column=0, padx=20, pady=10)
         # Submit button
         self.submit_btn = ctk.CTkButton(
             right_frame,
