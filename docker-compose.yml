@@ -9,7 +9,7 @@ services:
     container_name: face_attendance_app
     environment:
       # Database Configuration (kết nối với PostgreSQL có sẵn)
-      DATABASE_URL: postgresql://postgres:postgres@160.191.245.38:5433/face_attendance
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/face_attendance
       
       # Flask Configuration
       FLASK_ENV: development
@@ -17,7 +17,7 @@ services:
       SECRET_KEY: face-recognition-secret-key-docker-2024
       
       # MinIO Configuration (kết nối với MinIO có sẵn)
-      MINIO_ENDPOINT: 160.191.245.38:9000
+      MINIO_ENDPOINT: localhost:9000
       MINIO_ACCESS_KEY: admin
       MINIO_SECRET_KEY: Ngoquan@2003
       MINIO_BUCKET_NAME: face-check
