@@ -155,14 +155,14 @@ def recognize_face():
         # Check if image file is present
         if 'image' not in request.files:
             return handle_error('No image file provided')
-        
+
         file = request.files['image']
         if file.filename == '':
             return handle_error('No image file selected')
-        
+
         if not allowed_file(file.filename):
             return handle_error('Invalid file type. Allowed: png, jpg, jpeg, gif, bmp')
-        
+
         # Optional device_code (from form or header)
         device_code = request.form.get('device_code') or request.headers.get('X-Device-Code')
 
@@ -170,13 +170,36 @@ def recognize_face():
         image_data = file.read()
         if len(image_data) == 0:
             return handle_error('Empty image file')
-        
+
         # Recognize face (and log attendance on success)
         result = face_service.recognize_face(image_data, device_code=device_code)
-        
+
+        # Nếu nhận diện thành công -> gọi API check-in chấm công timesheet bên ngoài
+        if result.get("success") and result.get("employee_code"):
+            import os
+            import requests
+            CHECKIN_URL = os.environ.get("CHECKIN_URL", "https://api-ns.quannh.click/api/user-timesheet/check-in")
+
+            username = result["employee_code"]
+
+            headers = {
+                "Content-Type": "application/json"
+            }
+            payload = {"username": username}
+            try:
+                resp = requests.post(CHECKIN_URL, headers=headers, json=payload, timeout=7)
+                if resp.status_code == 200:
+                    result["checkin"] = True
+                else:
+                    result["checkin"] = False
+                    result["checkin_error"] = resp.text
+            except Exception as ex:
+                result["checkin"] = False
+                result["checkin_error"] = str(ex)
+
         # Return result using schema
         return jsonify(recognition_response_schema.dump(result))
-        
+
     except Exception as e:
         logger.error(f"Error in recognize_face: {str(e)}")
         return handle_error('Failed to recognize face', 500)
