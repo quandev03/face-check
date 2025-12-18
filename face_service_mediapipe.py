@@ -557,6 +557,23 @@ class FaceService:
                 'error': f'Delete error: {str(e)}'
             }
 
+    def delete_face_embedding_by_employee_code(self, employee_code):
+            """
+            Xoá (hoặc disable) toàn bộ face embedding của nhân viên
+            """
+        try:
+            query = """
+                    DELETE FROM face_embeddings
+                    WHERE employee_code = %s \
+                    """
+            db_manager.execute(query, (employee_code,))
+            return True
+
+        except Exception as e:
+            logger.error(
+                f"Failed to delete face embedding for employee_code={employee_code}: {str(e)}"
+            )
+            raise
 # Global face service instance
 face_service = FaceService()
 
