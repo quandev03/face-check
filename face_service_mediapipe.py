@@ -566,7 +566,7 @@ class FaceService:
                     DELETE FROM face_embeddings
                     WHERE employee_code = %s \
                     """
-            db_manager.execute(query, (employee_code,))
+            db_manager.execute_one(query, (employee_code,))
             return True
 
         except Exception as e:
