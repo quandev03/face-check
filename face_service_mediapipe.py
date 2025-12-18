@@ -558,9 +558,9 @@ class FaceService:
             }
 
     def delete_face_embedding_by_employee_code(self, employee_code):
-            """
-            Xoá (hoặc disable) toàn bộ face embedding của nhân viên
-            """
+        """
+        Xoá (hoặc disable) toàn bộ face embedding của nhân viên
+        """
         try:
             query = """
                     DELETE FROM face_embeddings
