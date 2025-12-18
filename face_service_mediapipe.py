@@ -564,7 +564,7 @@ class FaceService:
         try:
             query = """
                     DELETE FROM face_embeddings
-                    WHERE employee_code = %s
+                    WHERE employee_id = %s
                     RETURNING id 
                     """
             db_manager.execute_one(query, (employee_code,))
