@@ -89,60 +89,82 @@ def health_check():
 @app.route('/api/face/enroll', methods=['POST'])
 def enroll_face():
     """
-    API thêm mẫu khuôn mặt
-    Expects: multipart/form-data with 'image' file and form fields
+    API thêm / ghi đè mẫu khuôn mặt
+    - Nếu employee_code tồn tại → ghi đè khuôn mặt
+    - Nếu chưa tồn tại → tạo nhân viên mới
     """
     try:
-        # Check if image file is present
+        # ===== 1. Validate image =====
         if 'image' not in request.files:
             return handle_error('No image file provided')
-        
+
         file = request.files['image']
         if file.filename == '':
             return handle_error('No image file selected')
-        
+
         if not allowed_file(file.filename):
             return handle_error('Invalid file type. Allowed: png, jpg, jpeg, gif, bmp')
-        
-        # Validate form data
+
+        image_data = file.read()
+        if not image_data:
+            return handle_error('Empty image file')
+
+        # ===== 2. Validate form data =====
         form_data = request.form.to_dict()
         try:
             validated_data = face_enroll_schema.load(form_data)
         except ValidationError as err:
             return handle_error(f'Validation error: {err.messages}')
-        
-        # Read image data
-        image_data = file.read()
-        if len(image_data) == 0:
-            return handle_error('Empty image file')
-        
-        # Save face embedding
+
+        employee_code = validated_data['employee_code']
+
+        # ===== 3. Get or create employee =====
+        employee, is_created = get_or_create_employee(
+            employee_code=employee_code,
+            full_name=validated_data.get('full_name'),
+            email=validated_data.get('email'),
+            department=validated_data.get('department'),
+            position=validated_data.get('position')
+        )
+
+        # ===== 4. (Optional) Xoá embedding cũ nếu muốn ghi đè =====
+        face_service.delete_face_embedding_by_employee_code(employee_code)
+        # ↑ Nếu muốn cho phép nhiều khuôn mặt / history → bỏ dòng này
+
+        # ===== 5. Lưu face embedding =====
         result = face_service.save_face_embedding(
-            employee_code=validated_data['employee_code'],
+            employee_code=employee_code,
             image_data=image_data,
             created_by=validated_data.get('created_by'),
             source=validated_data.get('source', 'ENROLL'),
             content_type=file.content_type or 'image/jpeg'
         )
-        
-        if result['success']:
-            return jsonify({
-                'success': True,
-                'message': 'Face enrolled successfully',
-                'data': {
-                    'face_embedding_id': result['face_embedding_id'],
-                    'employee_code': validated_data['employee_code'],
-                    'quality_score': result['quality_score'],
-                    'bbox': result['bbox'],
-                    'image_url': result.get('image_url'),
-                    'minio_object_name': result.get('minio_object_name')
-                }
-            }), 201
-        else:
+
+        if not result['success']:
             return handle_error(result['error'])
-            
+
+        return jsonify({
+            'success': True,
+            'message': (
+                'Employee created & face enrolled successfully'
+                if is_created else
+                'Face updated successfully'
+            ),
+            'data': {
+                'employee': employee,
+                'is_new_employee': is_created,
+                'face_embedding_id': result['face_embedding_id'],
+                'quality_score': result['quality_score'],
+                'bbox': result['bbox'],
+                'image_url': result.get('image_url'),
+                'minio_object_name': result.get('minio_object_name')
+            }
+        }), 201 if is_created else 200
+
+    except ValueError as e:
+        return handle_error(str(e), 400)
     except Exception as e:
-        logger.error(f"Error in enroll_face: {str(e)}")
+        logger.exception("Error in enroll_face")
         return handle_error('Failed to enroll face', 500)
 
 @app.route('/api/face/recognize', methods=['POST'])
@@ -520,6 +542,34 @@ def delete_face_embedding_with_options(face_id):
     except Exception as e:
         logger.error(f"Error in delete_face_embedding: {str(e)}")
         return handle_error('Failed to delete face embedding', 500)
+
+def get_or_create_employee(employee_code, full_name=None, email=None, department=None, position=None):
+    # Check employee tồn tại
+    query_check = """
+                  SELECT id, employee_code, full_name
+                  FROM employees
+                  WHERE employee_code = %s \
+                  """
+    employee = db_manager.execute_one(query_check, (employee_code,))
+
+    if employee:
+        return dict(employee), False  # existed
+
+    # Nếu chưa tồn tại → tạo mới
+    if not full_name:
+        raise ValueError("full_name is required when creating new employee")
+
+    query_insert = """
+                   INSERT INTO employees (employee_code, full_name, email, department, position)
+                   VALUES (%s, %s, %s, %s, %s)
+                   RETURNING id, employee_code, full_name \
+                   """
+    new_employee = db_manager.execute_one(
+        query_insert,
+        (employee_code, full_name, email, department, position)
+    )
+
+    return dict(new_employee), True
 
 # Database initialization moved to main block
 
